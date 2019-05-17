@@ -25,6 +25,101 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(morgan('combined'));
 
+app.get('/empresa', (req, res) => {
+    const query = 'SELECT * FROM empresa limit 50';
+    db.query(query, (err, result) => {
+        if (err) {
+            res.json({ Data: err, Message: 'Error' });
+        }else{
+            res.json({ Data: result, Message: 'Success' });
+        }
+    });
+});
+
+app.post('/empresa', (req, res) => {
+    const objeto = req.body;
+    const nombre = objeto.nombre_establecimiento;
+    const razon = objeto.razon_social;
+    const query = `INSERT INTO empresa (nom_estab, razon_social) VALUES (${nombre}, ${razon})`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.json({ Data: err, Message: 'Error' });
+        }else{
+            res.json({ Data: result, Message: 'Success' });
+        }
+    });
+});
+
+app.get('/empresa/:id', (req, res) => {
+    const id = req.params.id;
+    const query = `SELECT * FROM empresa as e WHERE e.ID_empresa = ${id}`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.json({ Data: err, Message: 'Error' });
+        }else{
+            if (result.length == 0){
+                res.json({ Data: null, Message: 'Not found' });
+            }else{
+                let elemento = result[0];
+                const queryDos = `SELECT * FROM ubicacion as u WHERE u.ID_empresa = ${id}`;
+                db.query(queryDos, (err, result) => {
+                    if (err) {
+                        res.json({ Data: err, Message: 'Error' });
+                    }else{
+                        elemento.ubicaciones = result;
+                        res.json({ Data: elemento, Message: 'Success' });
+                    }
+                });
+            }
+        }
+    });
+});
+
+app.put('/empresa/:id', (req, res) => {
+    const id = req.params.id;
+    const objeto = req.body;
+    const nombre = objeto.nombre_establecimiento;
+    const razon = objeto.razon_social;
+    const query = `UPDATE empresa AS e SET nom_estab = '${nombre}', razon_social = '${razon}' WHERE e.ID_empresa = ${id}`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.json({ Data: err, Message: 'Error'});
+        }else{
+            res.json({ Data: result, Message: 'Success'});
+        }
+    });
+});
+
+app.delete('/empresa/:id', (req, res) => {
+    const id = req.params.id;
+    const query = `DELETE FROM empresa as e WHERE e.ID_empresa = ${id}`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.json({ Data: err, Message: 'Error' });
+        }else{
+            res.json({ Data: result, Message: 'Success' });
+        }
+    });
+});
+
+app.post('/login', (req, res) => {
+    const username = req.body.Rol;
+    const password = req.body.Password;
+    const query = `SELECT * FROM usuarios AS u WHERE u.rol = '${username}' AND u.contrasena = '${password}'`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.json({Data: err, Message: 'Error'});
+        }else{
+            if (result.length == 0){
+                res.json({ Data: null, Message: 'Wrong Credentials' });
+            }else {
+                res.json({ Data: result, Message: 'Success' });
+            }
+        }
+    });
+});
+
+
 app.listen(port, () => {
    console.log('App escuchando en el puerto 3000');
 });
