@@ -26,7 +26,9 @@ app.use(bodyParser.json());
 app.use(morgan('combined'));
 
 app.get('/empresa', (req, res) => {
-    const query = 'SELECT * FROM empresa limit 50';
+    const limit = req.query.limit;
+    const offset = req.query.offset;
+    const query = `SELECT * FROM empresa LIMIT ${limit} OFFSET ${offset}`;
     db.query(query, (err, result) => {
         if (err) {
             res.json({ Data: err, Message: 'Error' });
