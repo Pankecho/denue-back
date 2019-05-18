@@ -3,6 +3,7 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     mysql = require('mysql'),
     morgan = require('morgan'),
+    csv = require('csv-stringify'),
     port = 3000,
     app = express();
 
@@ -48,6 +49,30 @@ app.post('/empresa', (req, res) => {
             res.json({ Data: err, Message: 'Error' });
         }else{
             res.json({ Data: result, Message: 'Success' });
+        }
+    });
+});
+
+app.get('/empresa/:id/csv', (req, res) => {
+    const id = req.params.id;
+    const query = `select u.nom_vial as Calle,
+                           u.numero_ext as No_Ext,
+                           u.letra_ext as No_Int,
+                           u.localidad as Colonia,
+                           u.municipio as Municipio,
+                           u.entidad as Estado,
+                           u.latitud as Latitud,
+                           u.longitud as Longitud
+                           from ubicacion as u WHERE u.ID_empresa = ${id}`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.json({ Data: err, Message: 'Error' });
+        }else{
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename=\"' + id + '.csv\"');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Pragma', 'no-cache');
+            csv(result, { header: true }).pipe(res);
         }
     });
 });
