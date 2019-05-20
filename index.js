@@ -27,7 +27,7 @@ app.get('/empresa', (req, res) => {
     const limit = req.query.limit;
     const offset = req.query.offset;
     const busqueda = req.query.query;
-    const total = 'SELECT COUNT(*) AS total FROM empresa';
+    const total = `SELECT COUNT(*) AS total FROM empresa WHERE nom_estab LIKE '%${busqueda}%' OR razon_social LIKE '%${busqueda}%'`;
     db.query(total, (err, result) => {
         if (err) {
             res.status(500).json({ Data: err, Message: 'Error' });
@@ -57,6 +57,28 @@ app.post('/empresa', (req, res) => {
             res.status(500).json({ Data: err, Message: 'Error' });
         }else{
             res.json({ Data: result, Message: 'Success' });
+        }
+    });
+});
+
+// Borrar una empresa
+app.delete('/empresa', (req, res) => {
+    const id = req.body.ids;
+    const cadena = `(${id.join(',')})`;
+    const query = `DELETE FROM ubicacion as e WHERE e.ID_empresa in ${cadena}`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.status(500).json({ Data: err, Message: 'Error' });
+        }else{
+            const query = `DELETE FROM empresa as e WHERE e.ID_empresa in ${cadena}`;
+            db.query(query, (err, result) => {
+                if (err) {
+                    res.status(500).json({ Data: err, Message: 'Error' });
+                }else{
+
+                    res.json({ Data: result, Message: 'Success' });
+                }
+            });
         }
     });
 });
@@ -189,8 +211,8 @@ app.put('/ubicacion/:id', (req, res) => {
 
 // Endpoint para login
 app.post('/login', (req, res) => {
-    const username = req.body.Rol;
-    const password = req.body.Password;
+    const username = req.body.rol;
+    const password = req.body.contrasena;
     const query = `SELECT * FROM usuarios AS u WHERE u.rol = '${username}' AND u.contrasena = '${password}'`;
     db.query(query, (err, result) => {
         if (err) {
