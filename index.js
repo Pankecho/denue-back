@@ -10,10 +10,10 @@ const express = require('express'),
 // Configuracion de la base de datos
 const db = mysql.createPool({
     connectionLimit: 10,
-    host: '157.230.5.181',
-    user: 'pankecho',
-    password: 'juanpa',
-    database: 'denue'
+    host: 'localhost',
+    user: 'root',
+    password: 'Paola123',
+    database: 'DENUE'
 });
 
 
