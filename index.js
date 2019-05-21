@@ -11,9 +11,9 @@ const express = require('express'),
 const db = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
-    user: 'root',
-    password: 'Paola123',
-    database: 'DENUE'
+    user: 'pao',
+    password: 'paola123',
+    database: 'denue'
 });
 
 
@@ -27,13 +27,13 @@ app.get('/empresa', (req, res) => {
     const limit = req.query.limit;
     const offset = req.query.offset;
     const busqueda = req.query.query;
-    const total = `SELECT COUNT(*) AS total FROM empresa WHERE nom_estab LIKE '%${busqueda}%' OR razon_social LIKE '%${busqueda}%'`;
+    const total = `SELECT COUNT(*) AS total FROM empresa as e INNER JOIN ubicacion AS u on e.ID_empresa = u.ID_empresa  WHERE e.nom_estab LIKE '%${busqueda}%' OR e.razon_social LIKE '%${busqueda}%'`;
     db.query(total, (err, result) => {
         if (err) {
             res.status(500).json({ Data: err, Message: 'Error' });
         }else{
             const total = result[0].total;
-            const query = `SELECT * FROM empresa WHERE nom_estab LIKE '%${busqueda}%' OR razon_social LIKE '%${busqueda}%' ORDER BY ID_empresa DESC LIMIT ${limit} OFFSET ${offset}`;
+            const query = `SELECT * FROM empresa as e INNER JOIN ubicacion AS u on e.ID_empresa = u.ID_empresa  WHERE e.nom_estab LIKE '%${busqueda}%' OR e.razon_social LIKE '%${busqueda}%' or u.municipio LIKE '%${busqueda}%' ORDER BY e.ID_empresa DESC LIMIT ${limit} OFFSET ${offset}`;
             db.query(query, (err, result) => {
                 if (err) {
                     res.status(500).json({ Data: err, Message: 'Error' });
@@ -62,7 +62,7 @@ app.post('/empresa', (req, res) => {
 });
 
 // Borrar una empresa
-app.delete('/empresa', (req, res) => {
+app.post('/empresa/delete', (req, res) => {
     const id = req.body.ids;
     const cadena = `(${id.join(',')})`;
     const query = `DELETE FROM ubicacion as e WHERE e.ID_empresa in ${cadena}`;
