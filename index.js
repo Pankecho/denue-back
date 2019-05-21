@@ -10,9 +10,9 @@ const express = require('express'),
 // Configuracion de la base de datos
 const db = mysql.createPool({
     connectionLimit: 10,
-    host: 'localhost',
-    user: 'pao',
-    password: 'paola123',
+    host: '157.230.5.181',
+    user: 'pankecho',
+    password: 'juanpa',
     database: 'denue'
 });
 
@@ -57,6 +57,33 @@ app.post('/empresa', (req, res) => {
             res.status(500).json({ Data: err, Message: 'Error' });
         }else{
             res.json({ Data: result, Message: 'Success' });
+        }
+    });
+});
+
+app.get('/empresa/csv', (req, res) => {
+    const id = `(${req.query.ids})`;
+    const query = `select  e.nom_estab as Empresa,
+                           u.nom_vial as Calle,
+                           u.numero_ext as No_Ext,
+                           u.letra_ext as No_Int,
+                           u.localidad as Colonia,
+                           u.municipio as Municipio,
+                           u.entidad as Estado,
+                           u.latitud as Latitud,
+                           u.longitud as Longitud
+                           from empresa as e inner join ubicacion as u
+                           on e.ID_empresa = u.ID_empresa
+                           WHERE u.ID_empresa in ${id}`;
+    db.query(query, (err, result) => {
+        if (err) {
+            res.status(500).json({ Data: err, Message: 'Error' });
+        }else{
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename=\"' + id + '.csv\"');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Pragma', 'no-cache');
+            csv(result, { header: true }).pipe(res);
         }
     });
 });
@@ -219,7 +246,7 @@ app.post('/login', (req, res) => {
             res.status(500).json({Data: err, Message: 'Error'});
         }else{
             if (result.length === 0){
-                res.status(500).json({ Data: null, Message: 'Wrong Credentials' });
+                res.status(403).json({ Data: null, Message: 'Wrong Credentials' });
             }else {
                 res.json({ Data: result, Message: 'Success' });
             }
