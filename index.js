@@ -80,7 +80,7 @@ app.get('/empresa/csv', (req, res) => {
             res.status(500).json({ Data: err, Message: 'Error' });
         }else{
             res.setHeader('Content-Type', 'text/csv');
-            res.setHeader('Content-Disposition', 'attachment; filename=\"' + id + '.csv\"');
+            res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'empresas' + '.csv\"');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Pragma', 'no-cache');
             csv(result, { header: true }).pipe(res);
